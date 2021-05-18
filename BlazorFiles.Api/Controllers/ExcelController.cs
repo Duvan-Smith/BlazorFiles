@@ -29,7 +29,7 @@ namespace BlazorFiles.Api.Controllers
             string fileName = image.FileName;
             string extension = Path.GetExtension(fileName);
 
-            string[] allowedExtensions = { ".jpg", ".png", ".bmp" };
+            string[] allowedExtensions = { ".xlsx", ".xls" };
 
             if (!allowedExtensions.Contains(extension.ToLower()))
                 return BadRequest("File is not a valid image");
