@@ -21,25 +21,25 @@ namespace BlazorFiles.Api.Controllers
         }
 
         [HttpPost]
-        public async Task<IActionResult> Post([FromForm] IFormFile image)
+        public async Task<IActionResult> Post([FromForm] IFormFile excel)
         {
-            if (image == null || image.Length == 0)
+            if (excel == null || excel.Length == 0)
                 return BadRequest("Upload a file");
 
-            string fileName = image.FileName;
+            string fileName = excel.FileName;
             string extension = Path.GetExtension(fileName);
 
             string[] allowedExtensions = { ".xlsx", ".xls" };
 
             if (!allowedExtensions.Contains(extension.ToLower()))
-                return BadRequest("File is not a valid image");
+                return BadRequest("File is not a valid excel");
 
             string newFileName = $"{Guid.NewGuid()}{extension}";
             string filePath = Path.Combine(_environment.ContentRootPath, "wwwroot", "Excel", newFileName);
 
             using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
-                await image.CopyToAsync(fileStream).ConfigureAwait(false);
+                await excel.CopyToAsync(fileStream).ConfigureAwait(false);
             }
 
             return Ok($"Excel/{newFileName}");

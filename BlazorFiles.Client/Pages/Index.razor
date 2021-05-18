@@ -20,8 +20,6 @@
                 <li>Type: @type</li>
             </ul>
         </div>
-        <button class="btn btn-block btn-success" @onclick="async () => await UploadFileExcelAsync()">Upload File excel</button>
-
         @if (!string.IsNullOrWhiteSpace(message))
         {
             <div class="alert alert-success">
@@ -54,6 +52,8 @@
     {
         try
         {
+            var content = new MultipartFormDataContent();
+            content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
             var file = files.FirstOrDefault();
             if (file == null)
             {
@@ -90,6 +90,19 @@
                         fileContent = await reader.ReadToEndAsync();
                     }
                 }
+
+                content.Add(new StreamContent(fileStream, (int)fileStream.Length), "excel", fileName);
+
+                string url = "https://localhost:44345";
+
+                var response = await client.PostAsync($"{url}/api/excel", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var uploadedFileName = await response.Content.ReadAsStringAsync();
+                    imagePath = $"{url}/{uploadedFileName}";
+                    message = "File has been uploaded successfully!";
+                }
             }
         }
         catch (Exception e)
@@ -99,25 +112,6 @@
         finally
         {
             await InvokeAsync(StateHasChanged);
-        }
-    }
-
-    async Task UploadFileExcelAsync()
-    {
-        var content = new MultipartFormDataContent();
-        content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
-
-        content.Add(new StreamContent(fileStream, (int)fileStream.Length), "image", fileName);
-
-        string url = "https://localhost:44345";
-
-        var response = await client.PostAsync($"{url}/api/excel", content);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var uploadedFileName = await response.Content.ReadAsStringAsync();
-            imagePath = $"{url}/{uploadedFileName}";
-            message = "File has been uploaded successfully!";
         }
     }
 }
