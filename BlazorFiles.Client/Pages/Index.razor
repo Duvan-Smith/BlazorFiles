@@ -14,6 +14,7 @@
     <div class="col-4">
         <div class="form-group">
             <MatFileUpload OnChange="@FilesReadyForContent"></MatFileUpload>
+            <MatFileUpload OnChange="@FilesReadyForContentEpplus"></MatFileUpload>
             <ul>
                 <li>File Name: @fileName</li>
                 <li>Size: @size</li>
@@ -72,30 +73,58 @@
                 size = $"{file.Size}b";
                 type = file.Type;
 
-                if (stream.Length > 1024 * 1024)
-                {
-                    fileContent = "";
-                    fileContent += $"Name:\t{file.Name}\r\n";
-                    fileContent += $"Type:\t{file.Type}\r\n";
-                    fileContent += $"LastModified:\t{file.LastModified}\r\n";
-                    fileContent += $"Size:\t{file.Size}\r\n";
-                    fileContent += $"Time:\t{sw.Elapsed}\r\n";
-                    fileContent += $"Speed:\t{(stream.Length / sw.Elapsed.TotalSeconds):N0}  b/s\r\n";
-                }
-                else
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                    using (var reader = new StreamReader(stream))
-                    {
-                        fileContent = await reader.ReadToEndAsync();
-                    }
-                }
-
                 content.Add(new StreamContent(fileStream, (int)fileStream.Length), "excel", fileName);
 
                 string url = "https://localhost:44345";
 
                 var response = await client.PostAsync($"{url}/api/excel", content);
+
+                if (response.IsSuccessStatusCode)
+                {
+                    var uploadedFileName = await response.Content.ReadAsStringAsync();
+                    imagePath = $"{url}/{uploadedFileName}";
+                    message = "File has been uploaded successfully!";
+                }
+            }
+        }
+        catch (Exception e)
+        {
+            fileContent = $"Error:\r\n{e.Message}\r\n{e.StackTrace}";
+        }
+        finally
+        {
+            await InvokeAsync(StateHasChanged);
+        }
+    }
+    async Task FilesReadyForContentEpplus(IMatFileUploadEntry[] files)
+    {
+        try
+        {
+            var content = new MultipartFormDataContent();
+            content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
+            var file = files.FirstOrDefault();
+            if (file == null)
+            {
+                return;
+            }
+
+            using (var stream = new MemoryStream())
+            {
+                var sw = Stopwatch.StartNew();
+                await file.WriteToStreamAsync(stream);
+                sw.Stop();
+
+                fileStream = new MemoryStream(stream.ToArray());
+
+                fileName = file.Name;
+                size = $"{file.Size}b";
+                type = file.Type;
+
+                content.Add(new StreamContent(fileStream, (int)fileStream.Length), "excel", fileName);
+
+                string url = "https://localhost:44345";
+
+                var response = await client.PostAsync($"{url}/api/ExcelEPPlus", content);
 
                 if (response.IsSuccessStatusCode)
                 {
