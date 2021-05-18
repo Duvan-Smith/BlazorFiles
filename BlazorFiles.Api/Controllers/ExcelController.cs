@@ -10,12 +10,12 @@ namespace BlazorFiles.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ImagesController : ControllerBase
+    public class ExcelController : ControllerBase
     {
 
         private readonly IHostEnvironment _environment;
 
-        public ImagesController(IHostEnvironment environment)
+        public ExcelController(IHostEnvironment environment)
         {
             this._environment = environment;
         }
