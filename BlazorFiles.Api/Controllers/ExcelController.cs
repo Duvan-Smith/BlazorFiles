@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Http;
+﻿using ExcelDataReader;
+using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Data;
 using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,7 +19,7 @@ namespace BlazorFiles.Api.Controllers
 
         public ExcelController(IHostEnvironment environment)
         {
-            this._environment = environment;
+            _environment = environment;
         }
 
         [HttpPost]
@@ -40,8 +42,40 @@ namespace BlazorFiles.Api.Controllers
             using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
                 await excel.CopyToAsync(fileStream).ConfigureAwait(false);
+                _ = fileStream.FlushAsync();
             }
 
+            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+
+            using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
+            {
+                Console.WriteLine("Entrada 1");
+                var reader = ExcelReaderFactory.CreateReader(fileStream,
+                new ExcelReaderConfiguration() { FallbackEncoding = System.Text.Encoding.GetEncoding(1252) });
+                var dataset = reader.AsDataSet(new ExcelDataSetConfiguration()
+                {
+                    ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                    {
+                        UseHeaderRow = true
+                    }
+                });
+                foreach (DataTable table in dataset.Tables)
+                {
+                    foreach (DataRow row in table.Rows)
+                    {
+                        var apellido = (string)row["Apellido"];
+                        Console.WriteLine((string)row["Apellido"]);
+                        Console.WriteLine((string)row["Nombre"]);
+                        Console.WriteLine((string)row["Aficion"]);
+                        //personasLista.Add(new Persona()
+                        //{
+                        //    Apellido = (string)row["Apellido"],
+                        //    Nombre = (string)row["Nombre"],
+                        //    Aficion = (string)row["Aficion"]
+                        //});
+                    }
+                }
+            }
             return Ok($"Excel/{newFileName}");
         }
     }
