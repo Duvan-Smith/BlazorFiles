@@ -35,14 +35,14 @@ namespace BlazorFiles.Api.Controllers
                 return BadRequest("File is not a valid image");
 
             string newFileName = $"{Guid.NewGuid()}{extension}";
-            string filePath = Path.Combine(_environment.ContentRootPath, "wwwroot", "Images", newFileName);
+            string filePath = Path.Combine(_environment.ContentRootPath, "wwwroot", "Excel", newFileName);
 
             using (var fileStream = new FileStream(filePath, FileMode.Create, FileAccess.Write))
             {
                 await image.CopyToAsync(fileStream).ConfigureAwait(false);
             }
 
-            return Ok($"Images/{newFileName}");
+            return Ok($"Excel/{newFileName}");
         }
     }
 }

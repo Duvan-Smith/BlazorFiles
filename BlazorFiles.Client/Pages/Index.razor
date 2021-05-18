@@ -20,8 +20,6 @@
                 <li>Type: @type</li>
             </ul>
         </div>
-        <button class="btn btn-block btn-success" @onclick="async () => await UploadFileAsync()">Upload File</button>
-
         <button class="btn btn-block btn-success" @onclick="async () => await UploadFileExcelAsync()">Upload File excel</button>
 
         @if (!string.IsNullOrWhiteSpace(message))
@@ -94,7 +92,6 @@
                 }
             }
         }
-
         catch (Exception e)
         {
             fileContent = $"Error:\r\n{e.Message}\r\n{e.StackTrace}";
@@ -105,27 +102,6 @@
         }
     }
 
-    async Task UploadFileAsync()
-    {
-        // Create the content
-        var content = new MultipartFormDataContent();
-        content.Headers.ContentDisposition = new System.Net.Http.Headers.ContentDispositionHeaderValue("form-data");
-
-        content.Add(new StreamContent(fileStream, (int)fileStream.Length), "image", fileName);
-
-        Console.Write(content);
-
-        string url = "https://localhost:44345";
-
-        var response = await client.PostAsync($"{url}/api/images", content);
-
-        if (response.IsSuccessStatusCode)
-        {
-            var uploadedFileName = await response.Content.ReadAsStringAsync();
-            imagePath = $"{url}/{uploadedFileName}";
-            message = "File has been uploaded successfully!";
-        }
-    }
     async Task UploadFileExcelAsync()
     {
         var content = new MultipartFormDataContent();
