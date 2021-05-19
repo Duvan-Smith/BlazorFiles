@@ -2,7 +2,6 @@
 {
     public class OrganismosDto : TablaParametricaDto
     {
-        public string Title { get; set; }
         public string Divipo { get; set; }
         public string OrganismoTransito { get; set; }
         public string Jurisdiccion { get; set; }

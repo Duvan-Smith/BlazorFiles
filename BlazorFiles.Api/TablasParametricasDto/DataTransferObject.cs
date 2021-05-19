@@ -1,6 +1,6 @@
 ﻿namespace BlazorFiles.Api.TablasParametricasDto
 {
-    public class DataTransferObject
+    public abstract class DataTransferObject
     {
     }
 }
