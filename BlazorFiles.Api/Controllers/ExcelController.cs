@@ -1,8 +1,10 @@
-﻿using ExcelDataReader;
+﻿using BlazorFiles.Api.TablasParametricasDto;
+using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using System;
+using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -14,7 +16,6 @@ namespace BlazorFiles.Api.Controllers
     [ApiController]
     public class ExcelController : ControllerBase
     {
-
         private readonly IHostEnvironment _environment;
 
         public ExcelController(IHostEnvironment environment)
@@ -60,23 +61,29 @@ namespace BlazorFiles.Api.Controllers
                         UseHeaderRow = true
                     }
                 });
+                List<string> listOne = new List<string>();
+
+                List<DataTransferObject> ListDataT = new List<DataTransferObject>();
+                List<TablaParametricaDto> listTablaP = new List<TablaParametricaDto>();
+
+                List<MarcasDto> listMarcas = new List<MarcasDto>();
+
                 foreach (DataTable table in dataset.Tables)
                 {
+                    listOne.Add(table.TableName);
                     foreach (DataRow row in table.Rows)
                     {
                         var apellido = (string)row["Apellido"];
-                        Console.WriteLine((string)row["Apellido"]);
-                        Console.WriteLine((string)row["Nombre"]);
-                        Console.WriteLine((string)row["Aficion"]);
-                        //personasLista.Add(new Persona()
-                        //{
-                        //    Apellido = (string)row["Apellido"],
-                        //    Nombre = (string)row["Nombre"],
-                        //    Aficion = (string)row["Aficion"]
-                        //});
+                        listTablaP.Add(new MarcasDto()
+                        {
+                            Title = (string)row["apellido"],
+                            CodigoMarca = (string)row["nombre"],
+                            DescripcionMarca = (string)row["aficion"]
+                        });
                     }
                 }
             }
+
             return Ok($"Excel/{newFileName}");
         }
     }
