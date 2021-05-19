@@ -51,23 +51,23 @@ namespace BlazorFiles.Api.Controllers
                 var reader = ExcelReaderFactory.CreateReader(fileStream,
                 new ExcelReaderConfiguration() { FallbackEncoding = System.Text.Encoding.GetEncoding(1252) });
 
-                var dataset = reader.AsDataSet(new ExcelDataSetConfiguration()
-                {
-                    ConfigureDataTable = _ => new ExcelDataTableConfiguration()
-                    {
-                        //FilterRow = rowReader => rowReader != default,
-                        FilterColumn = (rowReader, columnIndex) => rowReader[columnIndex] != default,
-                        EmptyColumnNamePrefix = "Column",
-                        UseHeaderRow = true,
-                        ReadHeaderRow = (rowReader) =>
-                        {
-                            rowReader.Read();
-                            rowReader.Read();
-                            rowReader.Read();
-                        },
-                    }
-                });
-
+                //var dataset = reader.AsDataSet(new ExcelDataSetConfiguration()
+                //{
+                //    ConfigureDataTable = _ => new ExcelDataTableConfiguration()
+                //    {
+                //        //FilterRow = rowReader => rowReader != default,
+                //        FilterColumn = (rowReader, columnIndex) => rowReader[columnIndex] != default,
+                //        EmptyColumnNamePrefix = "Column",
+                //        UseHeaderRow = true,
+                //        ReadHeaderRow = (rowReader) =>
+                //        {
+                //            rowReader.Read();
+                //            rowReader.Read();
+                //            rowReader.Read();
+                //        },
+                //    }
+                //});
+                var dataset = reader.AsDataSet();
                 foreach (DataTable table in dataset.Tables)
                 {
                     var name = table.TableName;
@@ -76,40 +76,82 @@ namespace BlazorFiles.Api.Controllers
                     int rowCount = table.Rows.Count;
                     int count = 0;
 
-                    for (int row = 0; row < rowCount; row++)
-                    {
-                        DataRow rowData = table.Rows[row];
-                        var itemarray = rowData.ItemArray;
-                        foreach (var item in itemarray)
-                        {
-                            if (item.ToString().Length == 0)
-                            {
-                                count++;
-                            }
-                        }
-                        if (count == itemarray.Length)
-                        {
-                            rowData.Delete();
-                        }
-                        int colCount1 = rowData.Table.Columns.Count;
-                        int rowCount1 = rowData.Table.Rows.Count;
-                        if (count != itemarray.Length)
-                        {
-                            for (int col = 0; col < colCount1; col++)
-                            {
-                                DataColumn colData = table.Columns[col];
-                                var rowVar = rowData[col];
-
-                                Console.WriteLine(" Row:" + row + " column:" + col + " Value:" + colData + rowVar);
-                                count = 0;
-                            }
-                        }
-                        count = 0;
-                    }
+                    //RemoveEmptyRows(table);
+                    RemoveEmptyColumn(table);
                 }
             }
 
             return Ok($"Excel/{newFileName}");
+        }
+        private static void RemoveEmptyRows(DataTable usedRange)
+        {
+            int count;
+            DataTable curRange = new DataTable();
+
+            count = usedRange.Rows.Count;
+
+            for (int i = count; i > 0; i--)
+            {
+                bool isEmpty = true;
+
+                var currenntcolumns = usedRange.Rows[i];
+                var curRangeColumns = curRange.Rows[i];
+
+                curRangeColumns = currenntcolumns;
+
+                foreach (DataRow cell in curRangeColumns.Table.Rows)
+                {
+                    if (cell != null)
+                    {
+                        isEmpty = false;
+                        break; // we can exit this loop since the range is not empty
+                    }
+                    else
+                    {
+                        // Cell value is null contiue checking
+                    }
+                } // end loop thru each cell in this range (row or column)
+
+                if (isEmpty)
+                {
+                    curRangeColumns.Table.Rows.RemoveAt(i);
+                }
+            }
+        }
+        private static void RemoveEmptyColumn(DataTable usedRange)
+        {
+            int count;
+            DataTable curRange = new DataTable();
+
+            count = usedRange.Columns.Count;
+
+            for (int i = count; i > 0; i--)
+            {
+                bool isEmpty = true;
+
+                var currenntcolumns = usedRange.Columns[i];
+                var curRangeColumns = curRange.Columns[i];
+
+                curRangeColumns = currenntcolumns;
+
+                foreach (DataColumn cell in curRangeColumns.Table.Columns)
+                {
+                    if (cell != null)
+                    {
+                        isEmpty = false;
+                        break; // we can exit this loop since the range is not empty
+                    }
+                    else
+                    {
+                        // Cell value is null contiue checking
+                    }
+                } // end loop thru each cell in this range (row or column)
+
+                if (isEmpty)
+                {
+                    curRangeColumns.Table.Columns.RemoveAt(i);
+                }
+            }
         }
     }
 }
