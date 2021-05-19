@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
+using OfficeOpenXml;
 using System;
 using System.IO;
 using System.Linq;
@@ -10,12 +11,11 @@ namespace BlazorFiles.Api.Controllers
 {
     [Route("api/[controller]")]
     [ApiController]
-    public class ExcelEpplusController : ControllerBase
+    public class ExcelEPPlusController : ControllerBase
     {
-
         private readonly IHostEnvironment _environment;
 
-        public ExcelEpplusController(IHostEnvironment environment)
+        public ExcelEPPlusController(IHostEnvironment environment)
         {
             _environment = environment;
         }
@@ -43,8 +43,21 @@ namespace BlazorFiles.Api.Controllers
                 _ = fileStream.FlushAsync();
             }
 
-            System.Text.Encoding.RegisterProvider(System.Text.CodePagesEncodingProvider.Instance);
+            ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+            var package = new ExcelPackage(new FileInfo(filePath));
 
+            ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
+
+            int colCount = worksheet.Dimension.End.Column;  //get Column Count
+            int rowCount = worksheet.Dimension.End.Row;     //get row count
+
+            for (int row = 1; row <= rowCount; row++)
+            {
+                for (int col = 1; col <= colCount; col++)
+                {
+                    Console.WriteLine(" Row:" + row + " column:" + col + " Value:" + worksheet.Cells[row, col].Value?.ToString().Trim());
+                }
+            }
 
             return Ok($"Excel/{newFileName}");
         }
