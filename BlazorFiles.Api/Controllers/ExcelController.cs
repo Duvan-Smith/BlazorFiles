@@ -49,6 +49,7 @@ namespace BlazorFiles.Api.Controllers
 
             using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
+
                 Console.WriteLine("Entrada 1");
                 var reader = ExcelReaderFactory.CreateReader(fileStream,
                 new ExcelReaderConfiguration() { FallbackEncoding = System.Text.Encoding.GetEncoding(1252) });
