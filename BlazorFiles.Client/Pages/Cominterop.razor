@@ -5,12 +5,12 @@
 
 @inject HttpClient  client
 
-<h1>Libreria EPPlus</h1>
+<h1>Libreria Interop</h1>
 
 <div class="row">
     <div class="col-4">
         <div class="form-group">
-            <MatFileUpload OnChange="@FilesReadyForContentEpplus"></MatFileUpload>
+            <MatFileUpload OnChange="@FilesReadyForContentExcelInterop"></MatFileUpload>
             <ul>
                 <li>File Name: @fileName</li>
                 <li>Size: @size</li>
@@ -44,7 +44,7 @@
 
     Stream fileStream = null;
 
-    async Task FilesReadyForContentEpplus(IMatFileUploadEntry[] files)
+    async Task FilesReadyForContentExcelInterop(IMatFileUploadEntry[] files)
     {
         try
         {
@@ -72,7 +72,7 @@
 
                 string url = "https://localhost:44345";
 
-                var response = await client.PostAsync($"{url}/api/ExcelEPPlus", content);
+                var response = await client.PostAsync($"{url}/api/ExcelInterop", content);
 
                 if (response.IsSuccessStatusCode)
                 {

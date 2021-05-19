@@ -3,7 +3,6 @@
 @using System;
 @using System.Diagnostics;
 
-@inject IFileReaderService fileReader
 @inject HttpClient  client
 
 <h1>Libreria 1</h1>
@@ -35,7 +34,6 @@
 
 @functions
 {
-    ElementReference inputReference;
     string message = string.Empty;
     string imagePath = null;
 
