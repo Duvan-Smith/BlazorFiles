@@ -1,10 +1,8 @@
-﻿using BlazorFiles.Api.TablasParametricasDto;
-using ExcelDataReader;
+﻿using ExcelDataReader;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Hosting;
 using System;
-using System.Collections.Generic;
 using System.Data;
 using System.IO;
 using System.Linq;
@@ -50,35 +48,63 @@ namespace BlazorFiles.Api.Controllers
 
             using (var fileStream = new FileStream(filePath, FileMode.Open, FileAccess.Read))
             {
-                Console.WriteLine("Entrada 1");
                 var reader = ExcelReaderFactory.CreateReader(fileStream,
                 new ExcelReaderConfiguration() { FallbackEncoding = System.Text.Encoding.GetEncoding(1252) });
+
                 var dataset = reader.AsDataSet(new ExcelDataSetConfiguration()
                 {
-                    ConfigureDataTable = (_) => new ExcelDataTableConfiguration()
+                    ConfigureDataTable = _ => new ExcelDataTableConfiguration()
                     {
-                        UseHeaderRow = true
+                        //FilterRow = rowReader => rowReader != default,
+                        FilterColumn = (rowReader, columnIndex) => rowReader[columnIndex] != default,
+                        EmptyColumnNamePrefix = "Column",
+                        UseHeaderRow = true,
+                        ReadHeaderRow = (rowReader) =>
+                        {
+                            rowReader.Read();
+                            rowReader.Read();
+                            rowReader.Read();
+                        },
                     }
                 });
-                List<string> listOne = new List<string>();
-
-                List<DataTransferObject> ListDataT = new List<DataTransferObject>();
-                List<TablaParametricaDto> listTablaP = new List<TablaParametricaDto>();
-
-                List<MarcasDto> listMarcas = new List<MarcasDto>();
 
                 foreach (DataTable table in dataset.Tables)
                 {
-                    listOne.Add(table.TableName);
-                    foreach (DataRow row in table.Rows)
+                    var name = table.TableName;
+
+                    int colCount = table.Columns.Count;
+                    int rowCount = table.Rows.Count;
+                    int count = 0;
+
+                    for (int row = 0; row < rowCount; row++)
                     {
-                        var apellido = (string)row["Apellido"];
-                        listTablaP.Add(new MarcasDto()
+                        DataRow rowData = table.Rows[row];
+                        var itemarray = rowData.ItemArray;
+                        foreach (var item in itemarray)
                         {
-                            Title = (string)row["apellido"],
-                            CodigoMarca = (string)row["nombre"],
-                            DescripcionMarca = (string)row["aficion"]
-                        });
+                            if (item.ToString().Length == 0)
+                            {
+                                count++;
+                            }
+                        }
+                        if (count == itemarray.Length)
+                        {
+                            rowData.Delete();
+                        }
+                        int colCount1 = rowData.Table.Columns.Count;
+                        int rowCount1 = rowData.Table.Rows.Count;
+                        if (count != itemarray.Length)
+                        {
+                            for (int col = 0; col < colCount1; col++)
+                            {
+                                DataColumn colData = table.Columns[col];
+                                var rowVar = rowData[col];
+
+                                Console.WriteLine(" Row:" + row + " column:" + col + " Value:" + colData + rowVar);
+                                count = 0;
+                            }
+                        }
+                        count = 0;
                     }
                 }
             }
