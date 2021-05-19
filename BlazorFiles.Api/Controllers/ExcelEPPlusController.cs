@@ -13,7 +13,6 @@ namespace BlazorFiles.Api.Controllers
     [ApiController]
     public class ExcelEPPlusController : ControllerBase
     {
-
         private readonly IHostEnvironment _environment;
 
         public ExcelEPPlusController(IHostEnvironment environment)
@@ -48,8 +47,10 @@ namespace BlazorFiles.Api.Controllers
             var package = new ExcelPackage(new FileInfo(filePath));
 
             ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
+
             int colCount = worksheet.Dimension.End.Column;  //get Column Count
             int rowCount = worksheet.Dimension.End.Row;     //get row count
+
             for (int row = 1; row <= rowCount; row++)
             {
                 for (int col = 1; col <= colCount; col++)
