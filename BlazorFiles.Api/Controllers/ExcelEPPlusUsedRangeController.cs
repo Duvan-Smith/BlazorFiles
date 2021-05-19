@@ -22,6 +22,65 @@ namespace BlazorFiles.Api.Controllers
         {
             _environment = environment;
         }
+        //private static void ConventionalRemoveEmptyRowsCols(ExcelWorksheet worksheet)
+        //{
+        //    ExcelRange usedRange = worksheet.Cells;
+
+        //    int colCount = worksheet.Dimension.End.Column;  //get Column Count
+        //    int rowCount = worksheet.Dimension.End.Row;     //get row count
+
+        //    //int totalRows = usedRange.Rows.Count;
+        //    //int totalCols = usedRange.Columns.Count;
+
+        //    RemoveEmpty(colCount, rowCount, RowOrCol.Row);
+        //    RemoveEmpty(colCount, rowCount, RowOrCol.Column);
+        //}
+
+        //private static void RemoveEmpty(int colCount, int rowCount, RowOrCol rowOrCol)
+        //{
+        //    int count;
+        //    //ExcelRange curRange;
+        //    List<ExcelRange> curRangeList = new List<ExcelRange>();
+        //    //if (rowOrCol == RowOrCol.Column)
+        //    //    count = usedRange.Columns;
+        //    //else
+        //    //    count = usedRange.Rows;
+
+        //    for (int row = 1; row <= rowCount; row++)
+        //    {
+        //        for (int col = 1; col <= colCount; col++)
+        //        {
+        //            Console.WriteLine(" Row:" + row + " column:" + col + " Value:" + worksheet.Cells[row, col].Value?.ToString().Trim());
+        //        }
+        //    }
+
+        //    //for (int i = count; i > 0; i--)
+        //    //{
+        //    //    bool isEmpty = true;
+        //    //    if (rowOrCol == RowOrCol.Column)
+        //    //        curRange = usedRange.Columns[i];
+        //    //    else
+        //    //        curRange = usedRange.Rows[i];
+
+        //    //    foreach (Excel.Range cell in curRange.Cells)
+        //    //    {
+        //    //        if (cell.Value != null)
+        //    //        {
+        //    //            isEmpty = false;
+        //    //            break; // we can exit this loop since the range is not empty
+        //    //        }
+        //    //        else
+        //    //        {
+        //    //            // Cell value is null contiue checking
+        //    //        }
+        //    //    } // end loop thru each cell in this range (row or column)
+
+        //        if (isEmpty)
+        //        {
+        //            curRange.Delete(eShiftTypeDelete.Left);
+        //        }
+        //    }
+        //}
 
         [HttpPost]
         public async Task<IActionResult> Post([FromForm] IFormFile excel)
@@ -47,25 +106,31 @@ namespace BlazorFiles.Api.Controllers
             }
 
             ExcelPackage.LicenseContext = LicenseContext.NonCommercial;
+
             var package = new ExcelPackage(new FileInfo(filePath));
 
             ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
 
             int colCount = worksheet.Dimension.End.Column;  //get Column Count
             int rowCount = worksheet.Dimension.End.Row;     //get row count
+            var objectDataValuesExcel = worksheet.Cells.Value;
 
-
-
-            //for (int row = 1; row <= rowCount; row++)
-            //{
-            //    for (int col = 1; col <= colCount; col++)
-            //    {
-            //        Console.WriteLine(" Row:" + row + " column:" + col + " Value:" + worksheet.Cells[row, col].Value?.ToString().Trim());
-            //    }
-            //}
-
-            //    enum RowOrCol { Row, Column };
-
+            for (int row = 1; row <= rowCount; row++)
+            {
+                for (int col = 1; col <= colCount; col++)
+                {
+                    var FirstCellValue = worksheet.Cells[row, col].Value?.ToString().Trim();
+                    if (worksheet.Cells[row, col].Value == null)
+                    {
+                        //TODO: Lenny y Michael, validar que se eliminen filas y columnas
+                        //vacias, remplazar el metodo de Delerow que esta abajo
+                        //solution : cambiar el contador de colcount a uno para que 
+                        //solo lo haga una vez
+                        //worksheet.DeleteRow(row, col, true);
+                        var stateWorksheet = worksheet.Cells.Value;
+                    }
+                }
+            }
 
             return Ok($"Excel/{newFileName}");
         }
