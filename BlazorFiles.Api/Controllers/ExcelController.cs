@@ -74,32 +74,36 @@ namespace BlazorFiles.Api.Controllers
 
                     int colCount = table.Columns.Count;
                     int rowCount = table.Rows.Count;
-                    int count = 0;
+                    //int count = 0;
 
-                    //RemoveEmptyRows(table);
+                    RemoveEmptyRows(table);
                     RemoveEmptyColumn(table);
                 }
             }
 
             return Ok($"Excel/{newFileName}");
         }
-        private static void RemoveEmptyRows(DataTable usedRange)
+        private void RemoveEmptyRows(DataTable usedRange)
         {
             int count;
+            int colCount;
             DataTable curRange = new DataTable();
 
             count = usedRange.Rows.Count;
+            colCount = usedRange.Columns.Count;
+            count--;
 
             for (int i = count; i > 0; i--)
             {
                 bool isEmpty = true;
 
-                var currenntcolumns = usedRange.Rows[i];
-                var curRangeColumns = curRange.Rows[i];
+                DataRow currenntcolumns = usedRange.Rows[i];
 
-                curRangeColumns = currenntcolumns;
+                //var curRangeColumns = curRange.Rows[i];
+                //curRange.Rows.Add(currenntcolumns);
+                var curRangeColumns = currenntcolumns;
 
-                foreach (DataRow cell in curRangeColumns.Table.Rows)
+                foreach (DataRow cell in curRangeColumns.ItemArray)
                 {
                     if (cell != null)
                     {
@@ -114,8 +118,9 @@ namespace BlazorFiles.Api.Controllers
 
                 if (isEmpty)
                 {
-                    curRangeColumns.Table.Rows.RemoveAt(i);
+                    curRangeColumns.Delete();
                 }
+                curRange = curRangeColumns.Table;
             }
         }
         private static void RemoveEmptyColumn(DataTable usedRange)
