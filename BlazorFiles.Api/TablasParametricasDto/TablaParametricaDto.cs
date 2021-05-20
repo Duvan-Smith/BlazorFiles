@@ -4,5 +4,6 @@
     {
         public string Title { get; set; }
         public bool Check { get; set; }
+        public bool CreateDate { get; set; }
     }
 }
