@@ -55,27 +55,29 @@ namespace BlazorFiles.Api.Controllers
             int colCount = worksheet.Dimension.End.Column;  //get Column Count
             int rowCount = worksheet.Dimension.End.Row;     //get row count
             var objectDataValuesExcel = worksheet.Cells.Value;
+            var contContainText = 0;
 
             for (int row = 1; row <= rowCount; row++)
             {
-
-                if (worksheet.Cells[row, 2].Value == null)
-                {
-                    worksheet.DeleteRow(row);
-                }
+                //if (worksheet.Cells[row, 2].Value == null)
+                //{
+                //    worksheet.DeleteRow(row);
+                //}
                 for (int col = 1; col <= colCount; col++)
                 {
+                    var FirstCellValue = worksheet.Cells[row, col].Value?.ToString();
+                    if (FirstCellValue != null)
+                        contContainText += 1;
 
-                    var FirstCellValue = worksheet.Cells[row, col].Value?.ToString().Trim();
-                    if (FirstCellValue == null)
+                    if (contContainText == 0)
                     {
-                        //TODO: Lenny y Michael, validar que se eliminen las columnas
-                        //vacias, remplazar el metodo de DeleteColumn que esta abajo
-                        //solution : Colocar un condicional para que solo elimine una sola columna a la vez.
-                        //worksheet.DeleteRow(row, col, true);
-                        //worksheet.DeleteColumn(col);
+                        worksheet.DeleteRow(row);
+                        worksheet.DeleteColumn(col);
                         var stateWorksheet = worksheet.Cells.Value;
+                        contContainText = 0;
+                        break;
                     }
+                    var stateWorksheet2 = worksheet.Cells.Value;
                 }
             }
 
