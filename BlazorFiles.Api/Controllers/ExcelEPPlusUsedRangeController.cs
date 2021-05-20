@@ -50,33 +50,45 @@ namespace BlazorFiles.Api.Controllers
 
             var package = new ExcelPackage(new FileInfo(filePath));
 
-            ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
-
-            int colCount = worksheet.Dimension.End.Column;  //get Column Count
-            int rowCount = worksheet.Dimension.End.Row;     //get row count
-            var objectDataValuesExcel = worksheet.Cells.Value;
-
-            for (int row = 1; row <= rowCount; row++)
+            foreach (ExcelWorksheet worksheet in package.Workbook.Worksheets)
             {
-
-                if (worksheet.Cells[row, 2].Value == null)
+                int colCount = worksheet.Dimension.End.Column;
+                int rowCount = worksheet.Dimension.End.Row;
+                var objectDataValuesExcel = worksheet.Cells.Value;
+                int count = 0;
+                for (int row = 1; row <= rowCount; row++)
                 {
-                    worksheet.DeleteRow(row);
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        if (worksheet.Cells[row, col].Value?.ToString().Trim() == null)
+                        {
+                            count++;
+                        }
+                        if (count == colCount)
+                        {
+                            worksheet.DeleteRow(row);
+                        }
+                        objectDataValuesExcel = worksheet.Cells.Value;
+                    }
+                    count = 0;
                 }
                 for (int col = 1; col <= colCount; col++)
                 {
-
-                    var FirstCellValue = worksheet.Cells[row, col].Value?.ToString().Trim();
-                    if (FirstCellValue == null)
+                    for (int row = 1; row <= rowCount; row++)
                     {
-                        //TODO: Lenny y Michael, validar que se eliminen las columnas
-                        //vacias, remplazar el metodo de DeleteColumn que esta abajo
-                        //solution : Colocar un condicional para que solo elimine una sola columna a la vez.
-                        //worksheet.DeleteRow(row, col, true);
-                        //worksheet.DeleteColumn(col);
-                        var stateWorksheet = worksheet.Cells.Value;
+                        if (worksheet.Cells[row, col].Value?.ToString().Trim() == null)
+                        {
+                            count++;
+                        }
+                        if (count == rowCount)
+                        {
+                            worksheet.DeleteColumn(col);
+                        }
+                        objectDataValuesExcel = worksheet.Cells.Value;
                     }
+                    count = 0;
                 }
+                Console.WriteLine(objectDataValuesExcel);
             }
 
             return Ok($"Excel/{newFileName}");
