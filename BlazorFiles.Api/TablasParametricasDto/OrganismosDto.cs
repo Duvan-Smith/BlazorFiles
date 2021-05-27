@@ -1,6 +1,6 @@
 ﻿namespace BlazorFiles.Api.TablasParametricasDto
 {
-    public class OrganismosDto : TablaParametricaDto
+    public class TablasParametricasDto : TablaParametricaDto
     {
         public string Divipo { get; set; }
         public string OrganismoTransito { get; set; }

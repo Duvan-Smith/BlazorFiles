@@ -50,35 +50,45 @@ namespace BlazorFiles.Api.Controllers
 
             var package = new ExcelPackage(new FileInfo(filePath));
 
-            ExcelWorksheet worksheet = package.Workbook.Worksheets.FirstOrDefault();
-
-            int colCount = worksheet.Dimension.End.Column;  //get Column Count
-            int rowCount = worksheet.Dimension.End.Row;     //get row count
-            var objectDataValuesExcel = worksheet.Cells.Value;
-            var contContainText = 0;
-
-            for (int row = 1; row <= rowCount; row++)
+            foreach (ExcelWorksheet worksheet in package.Workbook.Worksheets)
             {
-                //if (worksheet.Cells[row, 2].Value == null)
-                //{
-                //    worksheet.DeleteRow(row);
-                //}
+                int colCount = worksheet.Dimension.End.Column;
+                int rowCount = worksheet.Dimension.End.Row;
+                var objectDataValuesExcel = worksheet.Cells.Value;
+                int count = 0;
+                for (int row = 1; row <= rowCount; row++)
+                {
+                    for (int col = 1; col <= colCount; col++)
+                    {
+                        if (worksheet.Cells[row, col].Value?.ToString().Trim() == null)
+                        {
+                            count++;
+                        }
+                        if (count == colCount)
+                        {
+                            worksheet.DeleteRow(row);
+                        }
+                        objectDataValuesExcel = worksheet.Cells.Value;
+                    }
+                    count = 0;
+                }
                 for (int col = 1; col <= colCount; col++)
                 {
-                    var FirstCellValue = worksheet.Cells[row, col].Value?.ToString();
-                    if (FirstCellValue != null)
-                        contContainText += 1;
-
-                    if (contContainText == 0)
+                    for (int row = 1; row <= rowCount; row++)
                     {
-                        worksheet.DeleteRow(row);
-                        worksheet.DeleteColumn(col);
-                        var stateWorksheet = worksheet.Cells.Value;
-                        contContainText = 0;
-                        break;
+                        if (worksheet.Cells[row, col].Value?.ToString().Trim() == null)
+                        {
+                            count++;
+                        }
+                        if (count == rowCount)
+                        {
+                            worksheet.DeleteColumn(col);
+                        }
+                        objectDataValuesExcel = worksheet.Cells.Value;
                     }
-                    var stateWorksheet2 = worksheet.Cells.Value;
+                    count = 0;
                 }
+                Console.WriteLine(objectDataValuesExcel);
             }
 
             return Ok($"Excel/{newFileName}");
