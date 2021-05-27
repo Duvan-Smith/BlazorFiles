@@ -5,46 +5,79 @@
 @using System;
 @using System.Diagnostics;
 
+
 @inject IFileReaderService fileReader
-@inject HttpClient  client
+@inject HttpClient client
+
 
 <h1>Upload file with EPPLUS Library !</h1>
 
 <div class="row">
     <div class="col-4">
         <div class="form-group">
-            <MatFileUpload OnChange="@FilesReadyForContent"></MatFileUpload>
+            <MatFileUpload OnChange="@FilesReadyForContent" Class="progress-bar" />
             <ul>
                 <li>File Name: @fileName</li>
                 <li>Size: @size</li>
                 <li>Type: @type</li>
             </ul>
         </div>
+
         @if (!string.IsNullOrWhiteSpace(message))
         {
+
             <div class="alert alert-success">
-                File has been uploaded
+                @message
             </div>
         }
-    </div>
-    <div class="col-4">
-        @if (imagePath != null)
+
+        else
         {
-            <img alt="@imagePath" height="100" width="100" />
+            <div class="alert-danger">
+                @error
+            </div>
         }
+
+
+        @if (size == 8187.ToString())
+        {
+            <div class="alert-danger">
+                @archivoNulo
+            </div>
+            @*if (file.Size == null || file.Size == default)
+            {
+                <div class="alert-danger">
+                    @error
+                </div>
+            }*@
+        }
+
+
     </div>
+
+    @*TODO:Lenny - aquí se agrega el componente de las páginas*@
+    @*<div class="col-4">
+            @if (imagePath != null)
+            {
+                <img alt="@imagePath" height="100" width="100" />
+            }
+        </div>*@
 </div>
 
 @functions
 {
     ElementReference inputReference;
     string message = string.Empty;
+    string error = string.Empty;
+    string archivoNulo = "archivo nulo";
     string imagePath = null;
+
 
     string fileName = string.Empty;
     string type = string.Empty;
     string size = string.Empty;
     string fileContent;
+    IMatFileUploadEntry file;
 
     Stream fileStream = null;
 
@@ -60,36 +93,21 @@
                 return;
             }
 
+
             using (var stream = new MemoryStream())
             {
+
                 var sw = Stopwatch.StartNew();
                 await file.WriteToStreamAsync(stream);
                 sw.Stop();
 
                 fileStream = new MemoryStream(stream.ToArray());
 
+
                 fileName = file.Name;
                 size = $"{file.Size}b";
+                //size = file.Size.ToString();
                 type = file.Type;
-
-                if (stream.Length > 1024 * 1024)
-                {
-                    fileContent = "";
-                    fileContent += $"Name:\t{file.Name}\r\n";
-                    fileContent += $"Type:\t{file.Type}\r\n";
-                    fileContent += $"LastModified:\t{file.LastModified}\r\n";
-                    fileContent += $"Size:\t{file.Size}\r\n";
-                    fileContent += $"Time:\t{sw.Elapsed}\r\n";
-                    fileContent += $"Speed:\t{(stream.Length / sw.Elapsed.TotalSeconds):N0}  b/s\r\n";
-                }
-                else
-                {
-                    stream.Seek(0, SeekOrigin.Begin);
-                    using (var reader = new StreamReader(stream))
-                    {
-                        fileContent = await reader.ReadToEndAsync();
-                    }
-                }
 
                 content.Add(new StreamContent(fileStream, (int)fileStream.Length), "excel", fileName);
 
@@ -99,10 +117,19 @@
 
                 if (response.IsSuccessStatusCode)
                 {
+
                     var uploadedFileName = await response.Content.ReadAsStringAsync();
-                    imagePath = $"{url}/{uploadedFileName}";
+                    //imagePath = $"{url}/{uploadedFileName}";
                     message = "File has been uploaded successfully!";
                 }
+                else
+                {
+                    message = string.Empty;
+                    error = "Seleccione solo archivos con formato excel";
+                }
+
+                //if (file == null)
+                //    error = "sin información";
             }
         }
         catch (Exception e)
@@ -113,5 +140,15 @@
         {
             await InvokeAsync(StateHasChanged);
         }
+    }
+}
+
+@code{
+
+    enum extensiones
+    {
+
+        xls,
+        xlsx
     }
 }
